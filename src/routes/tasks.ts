@@ -1,23 +1,43 @@
 import express from 'express';
+import { prisma } from '../database/prisma';
 
 export const router = express.Router();
 
 router.get('/tasks', async function (req, res) {
-  res.send('Get tasks');
+  const tasks = await prisma.task.findMany();
+
+  res.json({ tasks });
 });
 
-router.get('/tasks/:id', function (req, res) {
-  res.send('Get task: ' + req.params.id);
+router.get<{ id: number }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.findUnique({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ task });
 });
 
-router.post('/tasks', function (req, res) {
-  res.send('Create task: ' + JSON.stringify(req.body));
+router.post<{}, {}, { user_id: number, content: string }>('/tasks', async function (req, res) {
+  const task = await prisma.task.create({ 
+    data: { ...req.body },
+  });
+
+  res.json({ task });
 });
 
-router.put('/tasks', function (req, res) {
-  res.send('Update task: ' + JSON.stringify(req.body));
+router.put<{ id: number }, {}, { content?: string }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.update({ 
+    where: { id: req.params.id },
+    data: { ...req.body },
+  });
+
+  res.json({ task });
 });
 
-router.delete('/tasks/:id', function (req, res) {
-  res.send('Delete task: ' + req.params.id);
+router.delete<{ id: number }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.delete({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ task });
 });

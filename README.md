@@ -242,15 +242,14 @@ model User {
   email    String  @unique
   name     String?
   passwrod String
-  Post     Post[]  @relation("UserOnPost")
+  Post     Task[]  @relation("UserOnTask")
 }
 
-model Post {
+model Task {
   id        Int     @id @default(autoincrement())
   user_id   Int
-  image_url String?
   content   String?
-  user      User    @relation("UserOnPost", fields: [user_id], references: [id], onDelete: Cascade)
+  user      User    @relation("UserOnTask", fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 
@@ -301,3 +300,119 @@ DATABASE_DB="root"
 ##para acessar o banco você pode usar o prisma studio com o seguinte comando
 -> npx prisma studio
 
+#proximos passos, deve ser criado o arquivo /src/routes/users.ts
+import express from 'express';
+import { prisma } from '../database/prisma';
+
+export const router = express.Router();
+
+router.get('/users', async function (req, res) {
+  const users = await prisma.user.findMany();
+
+  res.json({ users });
+});
+
+router.get<{ id: number }>('/users/:id', async function (req, res) {
+  const user = await prisma.user.findUnique({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ user });
+});
+
+router.post<{}, {}, { email: string, passwrod: string }>('/users', async function (req, res) {
+  const user = await prisma.user.create({ 
+    data: { ...req.body },
+  });
+
+  res.json({ user });
+});
+
+router.put<{ id: number }, {}, { name?: string }>('/users/:id', async function (req, res) {
+  const user = await prisma.user.update({ 
+    where: { id: req.params.id },
+    data: { ...req.body },
+  });
+
+  res.json({ user });
+});
+
+router.delete<{ id: number }>('/users/:id', async function (req, res) {
+  const user = await prisma.user.delete({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ user });
+});
+
+#também deve ser criado um arquivo src/routes/tasks.ts
+import express from 'express';
+import { prisma } from '../database/prisma';
+
+export const router = express.Router();
+
+router.get('/tasks', async function (req, res) {
+  const tasks = await prisma.task.findMany();
+
+  res.json({ tasks });
+});
+
+router.get<{ id: number }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.findUnique({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ task });
+});
+
+router.post<{}, {}, { user_id: number, content: string }>('/tasks', async function (req, res) {
+  const task = await prisma.task.create({ 
+    data: { ...req.body },
+  });
+
+  res.json({ task });
+});
+
+router.put<{ id: number }, {}, { content?: string }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.update({ 
+    where: { id: req.params.id },
+    data: { ...req.body },
+  });
+
+  res.json({ task });
+});
+
+router.delete<{ id: number }>('/tasks/:id', async function (req, res) {
+  const task = await prisma.task.delete({ 
+    where: { id: req.params.id },
+  });
+
+  res.json({ task });
+});
+
+
+#após importe no arquivo src/server.ts
+import express from 'express';
+import cors from 'cors';
+
+import { router as users } from './routes/users';
+import { router as tasks } from './routes/tasks';
+
+const app = express();
+
+app.use(cors());
+
+app.use(express.json());
+
+app.use(users);
+app.use(tasks);
+
+app.listen(80, () => {
+  console.log('Server running in http://localhost:80/');
+});
+
+#execute o servidor com o comando yarn dev
+
+#e use o postman para testar as rotas
+
+#e use o prisma estudio com o comando npx prisma studio

@@ -15,13 +15,12 @@ model User {
   email    String  @unique
   name     String?
   passwrod String
-  Post     Post[]  @relation("UserOnPost")
+  Post     Task[]  @relation("UserOnTask")
 }
 
-model Post {
+model Task {
   id        Int     @id @default(autoincrement())
   user_id   Int
-  image_url String?
   content   String?
-  user      User    @relation("UserOnPost", fields: [user_id], references: [id], onDelete: Cascade)
+  user      User    @relation("UserOnTask", fields: [user_id], references: [id], onDelete: Cascade)
 }
