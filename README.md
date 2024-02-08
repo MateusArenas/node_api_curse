@@ -215,3 +215,89 @@ POST http://localhost/tasks
 - body
 PUT http://localhost/tasks/1
 - body
+
+
+
+-------
+
+#referencia
+https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/introduction#5-evolving-your-application
+
+###adicione o prisma em seu projeto com 
+-> yarn add prisma
+
+
+##logo após execute
+
+-> npx prisma init --datasource-provider postgresql
+
+após executar esse comado será criado prisma/schema.prisma com as configurações para o postgres
+
+#também será criado um arquivo .env na raiz do seu prejeto com a seguinte variavel de ambiente
+-> DATABASE_URL: postgresql://username:password@localhost:5432/mydb?schema=public
+
+#deve adicionar no arquivo prisma/schema.prisma o seguinte código
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
+  passwrod String
+  Post     Post[]  @relation("UserOnPost")
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  user_id   Int
+  image_url String?
+  content   String?
+  user      User    @relation("UserOnPost", fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+
+
+#adicione a biblioteca @prisma/client
+-> yarn add @prisma/client
+
+#crie um arquivo src/database/prisma.ts e coloque o sequinte código
+import { PrismaClient } from '@prisma/client/edge';
+export const prisma = new PrismaClient();
+
+#após isso baixe o docker para o seu computador eo configure
+
+#crie um arquivo chamado docker-compose.yml na raiz do seu projeto com o seguinte código nele
+version: '3'
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgis/postgis:13-3.1-alpine
+    restart: always
+    volumes:
+      - /pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_DB}
+
+##e adicione o seguitne codigo no arquivo .env
+
+DATABASE_USER="root"
+DATABASE_PASSWORD="root"
+DATABASE_DB="root"
+
+#ative o docker em sua maquina e após execute o seguinte código na raiz do seu projeto em um terminal
+-> docker-compose up 
+
+-irá estartar o banco de dados postgress já configurado e pronto para ser conectado
+
+#para sincronizar o prisma com o seu banco de dados deve ser executado o seguinte comando
+-> npx prisma db push
+
+#caso tenha feito alguma alteração no schema do prisma em prisma/schema.prisma deve executar o comando abaixo para gerar a migration
+-> npx prisma generate
+
+##para acessar o banco você pode usar o prisma studio com o seguinte comando
+-> npx prisma studio
+

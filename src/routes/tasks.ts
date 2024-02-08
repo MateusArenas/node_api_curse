@@ -2,7 +2,7 @@ import express from 'express';
 
 export const router = express.Router();
 
-router.get('/tasks', function (req, res) {
+router.get('/tasks', async function (req, res) {
   res.send('Get tasks');
 });
 
