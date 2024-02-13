@@ -1,5 +1,5 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add @serializable/ts
+  C:\Program Files\nodejs\node.exe C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js
 
 PATH: 
   C:\Python310\Scripts\;C:\Python310\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\ProgramData\chocolatey\bin;C:\Program Files\OpenJDK\openjdk-11.0.12_7\bin;C:\Android\Sdk\emulator;C:\Android\Sdk\tools;C:\Android\Sdk\tools\bin;C:\Android\Sdk\platform-tools;C:\Users\Mateu\AppData\Local\Yarn\bin;C:\Program Files\Amazon\AWSCLIV2\;C:\Users\Mateu\bin;C:\Program Files (x86)\PuTTY\;C:\Program Files\stripe;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\DTS\Binn\;C:\Program Files\Azure Data Studio\bin;C:\sqlite;C:\xampp\php;C:\composer;C:\Program Files\MySQL\MySQL Server 8.0\bin;C:\Program Files\nodejs\;C:\Users\Mateu\AppData\Local\Programs\Python\Python311\Scripts\;C:\Users\Mateu\AppData\Local\Programs\Python\Python311\;C:\Users\Mateu\AppData\Local\Microsoft\WindowsApps;C:\Users\Mateu\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Mateu\AppData\Local\Yarn\bin;C:\Users\Mateu\bin;C:\Users\Mateu\AppData\Local\atom\bin;C:\Users\Mateu\.dotnet\tools;C:\Program Files\Azure Data Studio\bin;C:\sqlite;C:\Users\Mateu\AppData\Roaming\Composer\vendor\bin;C:\Users\Mateu\AppData\Roaming\npm
@@ -14,17 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@serializable%2fts: Not found
-      at params.callback [as _callback] (C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:67029:18)
-      at self.callback (C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140883:22)
-      at Request.emit (node:events:518:28)
-      at Request.<anonymous> (C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141855:10)
-      at Request.emit (node:events:518:28)
-      at IncomingMessage.<anonymous> (C:\Users\Mateu\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141777:12)
-      at Object.onceWrapper (node:events:632:28)
-      at IncomingMessage.emit (node:events:530:35)
-      at endReadableNT (node:internal/streams/readable:1696:12)
-      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+  Error: EPERM: operation not permitted, unlink 'C:\curse_project\typescript_configuration\node_modules\prisma\engines\23fdc5965b1e05fc54e5f26ed3de66776b93de64\query_engine-windows.dll.node'
 
 npm manifest: 
   {
@@ -38,6 +28,7 @@ npm manifest:
       "start": "node dist/server.js"
     },
     "devDependencies": {
+      "@types/bcryptjs": "^2.4.6",
       "@types/cors": "^2.8.17",
       "@types/express": "^4.17.21",
       "@types/morgan": "^1.9.9",
@@ -49,6 +40,7 @@ npm manifest:
     "dependencies": {
       "@prisma/client": "^5.9.1",
       "@types/dotenv": "^8.2.0",
+      "bcryptjs": "^2.4.3",
       "cors": "^2.8.5",
       "express": "^4.18.2",
       "express-async-errors": "^3.1.1",
@@ -356,6 +348,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.9.6.tgz#2c1fb69e02a3f1506f52698cfdc3a8b6386df9a6"
     integrity sha512-jqzNLhNDvIZOrt69Ce4UjGRpXJBzhUBzawMwnaDAwyHriki3XollsewxWzOzz+4yOFDkuJHtTsZFwMxhYJWmLQ==
   
+  "@types/bcryptjs@^2.4.6":
+    version "2.4.6"
+    resolved "https://registry.yarnpkg.com/@types/bcryptjs/-/bcryptjs-2.4.6.tgz#2b92e3c2121c66eba3901e64faf8bb922ec291fa"
+    integrity sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==
+  
   "@types/body-parser@*":
     version "1.19.5"
     resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.5.tgz#04ce9a3b677dc8bd681a17da1ab9835dc9d3ede4"
@@ -537,6 +534,11 @@ Lockfile:
     integrity sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==
     dependencies:
       safe-buffer "5.1.2"
+  
+  bcryptjs@^2.4.3:
+    version "2.4.3"
+    resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-2.4.3.tgz#9ab5627b93e60621ff7cdac5da9733027df1d0cb"
+    integrity sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==
   
   binary-extensions@^2.0.0:
     version "2.2.0"

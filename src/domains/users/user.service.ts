@@ -4,13 +4,14 @@ import { UserUpdateDto } from '../../dtos/users/user-update.dto';
 import { BadRequest } from '../../exceptions/BadRequest';
 import { User } from './user.entity';
 import { NotFound } from '../../exceptions/NotFound';
+import { ListUsersDto } from '../../dtos/users/user-list.dto';
 
 // Lógica de negócio para operações em usuários
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async list(search?: string): Promise<User[]> {
-    const usersProps = await this.userRepository.findAll(search);
+  async list(params: ListUsersDto): Promise<User[]> {
+    const usersProps = await this.userRepository.findAll(params);
 
     const users = usersProps.map((userProps) => new User(userProps));
 
