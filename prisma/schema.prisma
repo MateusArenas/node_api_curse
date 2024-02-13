@@ -11,16 +11,24 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       String  @id @default(uuid())
   email    String  @unique
   name     String?
-  passwrod String
-  Post     Task[]  @relation("UserOnTask")
+  password String
+
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @updatedAt @db.Timestamp(6)
+
+  Post Task[] @relation("UserOnTask")
 }
 
 model Task {
-  id        Int     @id @default(autoincrement())
-  user_id   Int
-  content   String?
-  user      User    @relation("UserOnTask", fields: [user_id], references: [id], onDelete: Cascade)
+  id      String  @id @default(uuid())
+  user_id String
+  content String?
+
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @updatedAt @db.Timestamp(6)
+
+  user User @relation("UserOnTask", fields: [user_id], references: [id], onDelete: Cascade)
 }

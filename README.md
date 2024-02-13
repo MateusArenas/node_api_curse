@@ -416,3 +416,277 @@ app.listen(80, () => {
 #e use o postman para testar as rotas
 
 #e use o prisma estudio com o comando npx prisma studio
+
+
+
+#Protegendo sua Aplicação com Tratamento de Erros
+
+#vamos primeiro utilizar a lib morgan para debug de tempo de requisições 
+para o express.js ela é feita apartir de midlewares do express.js
+
+-> yarn add morgan
+
+#e os types do morgan
+
+-> yarn add @types/morgan -D
+
+#após adicione em src/server.ts
+
+...
+
+import morgan from 'morgan'; // aqui
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
+
+...
+
+#após execute a sua aplicação e verá quando fazer uma requisição uma saida nesse formato
+mostrando o método, rota, status code, e tempo de resposta em milesegundos da requisição.
+
+GET /users 200 33.918 ms - 12
+
+#para começarmos os nosso tratamentos de erro instale a lib
+
+-> yarn add express-async-errors
+
+#e o inclua em src/server.ts com import é necessario logo acima da instancia do express
+#atenção ele deve ser colocado acima das suas rotas e midleares, tem que ficar no topo e abaixo do import do express.js
+
+...
+
+import express, { Request, Response, NextFunction } from 'express';
+
+....
+
+import 'express-async-errors'; // aqui
+
+import { router as users } from './routes/users';
+import { router as tasks } from './routes/tasks';
+
+const app = express();
+
+...
+
+#após crie um arquivo /exceptions/HttpException.ts
+
+export type ExceptionResponse = {
+  message: string;
+  [key: string]: any;
+};
+
+export class HttpException extends Error {
+  response: ExceptionResponse;
+  status: number;
+  code: string;
+
+  constructor(
+    response: ExceptionResponse,
+    status: number = 500,
+    code: string = 'GENERIC_ERROR'
+  ) {
+    super(response.message);
+    this.response = response;
+    this.status = status;
+    this.code = code;
+    Object.setPrototypeOf(this, HttpException.prototype);
+  }
+
+  public toJSON() {
+    return Object.assign(this.response, {
+      status: this.status,
+      code: this.code,
+    });
+  }
+}
+
+
+
+#essa classe de error do node.js será aonde iremos nos basear em criarmos os nossas outras classes de erros
+
+#agora para facilitar iremos adicionar abstrações dos códigos de erros,
+iremos criar os seguintes:
+
+#Eror 400 Bad Request em src/exceptions/BadRequest.ts
+
+import { HttpException, ExceptionResponse } from './HttpException';
+
+export class BadRequest extends HttpException {
+  constructor(response: ExceptionResponse, code = 'BAD_REQUEST') {
+    super(response, 400, code);
+    Object.setPrototypeOf(this, BadRequest.prototype);
+  }
+}
+
+
+#Eror 404 Not Found em src/exceptions/NotFound.ts
+
+import { HttpException, ExceptionResponse } from './HttpException';
+
+export class NotFound extends HttpException {
+  constructor(response: ExceptionResponse, code = 'NOT_FOUND') {
+    super(response, 404, code);
+    Object.setPrototypeOf(this, NotFound.prototype);
+  }
+}
+
+
+#Eror 401 Unauthorized em src/exceptions/Unauthorized.ts
+
+import { HttpException, ExceptionResponse } from './HttpException';
+
+export class Unauthorized extends HttpException {
+  constructor(response: ExceptionResponse, code = 'UNAUTHORIZED') {
+    super(response, 401, code);
+    Object.setPrototypeOf(this, Unauthorized.prototype);
+  }
+}
+
+#Error 500 Server Error em src/exceptions/ServerError.ts
+
+import { HttpException, ExceptionResponse } from './HttpException';
+
+export class ServerError extends HttpException {
+  constructor(response: ExceptionResponse, code = 'SERVER_ERROR') {
+    super(response, 500, code);
+    Object.setPrototypeOf(this, ServerError.prototype);
+  }
+}
+
+
+#agora em handlers/errorHandling.ts vamos criar um midlearewe para tratamento de exeções o coloque abaixo das rotas
+
+import { Request, Response, NextFunction } from 'express';
+import { HttpException } from '../exceptions/HttpException';
+
+export function errorHandling(
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (error instanceof HttpException) {
+    return res.status(error.status).json(error);
+  }
+
+  return res.status(500).json({ message: 'Internal server error' });
+}
+
+
+#após a criação deve ser importado e usado em src/server.ts
+
+...
+
+require('express-async-errors');
+
+import { errorHandling } from './handlers/errorHandling'; // aqui
+
+...
+
+const app = express();
+
+...
+
+app.use(tasks);
+app.use(users);
+
+app.use(errorHandling); // aqui
+
+...
+
+#agora vamos começar o nosso tratamento de erros
+
+#vá em routes/users.ts e refature para o código abaixo:
+
+import express from 'express';
+import { prisma } from '../database/prisma';
+import { NotFound } from '../exceptions/NotFound';
+import { BadRequest } from '../exceptions/BadRequest';
+
+export const router = express.Router();
+
+router.get('/users', async (req, res) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, email: true, password: false },
+    where: {},
+  });
+
+  res.json({ users });
+});
+
+router.get('/users/:id', async (req, res) => {
+  const user = await prisma.user.findUnique({
+    select: { id: true, email: true, name: true, password: false },
+    where: { id: Number(req.params.id) },
+  });
+
+  if (!user) {
+    throw new NotFound({ message: 'User not exists!' });
+  }
+
+  res.json({ user });
+});
+
+router.post('/users', async function (req, res) {
+  const alreadyExists = await prisma.user.findFirst({
+    where: { email: req.body.email },
+  });
+
+  if (alreadyExists) {
+    throw new BadRequest({ message: 'User already exists!' });
+  }
+
+  const user = await prisma.user.create({
+    select: { id: true, email: true, name: true, password: false },
+    data: { ...req.body },
+  });
+
+  res.json({ user });
+});
+
+router.put('/users/:id', async function (req, res) {
+  const alreadyExists = await prisma.user.findUnique({
+    where: { id: Number(req.params.id) },
+  });
+
+  if (!alreadyExists) {
+    throw new NotFound({ message: 'User not exists!' });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: alreadyExists.id },
+    data: { ...req.body },
+  });
+
+  res.json({ user });
+});
+
+router.delete('/users/:id', async function (req, res) {
+  const alreadyExists = await prisma.user.findUnique({
+    where: { id: Number(req.params.id) },
+  });
+
+  if (!alreadyExists) {
+    throw new NotFound({ message: 'User not exists!' });
+  }
+
+  const user = await prisma.user.delete({
+    where: { id: alreadyExists.id },
+  });
+
+  res.json({ user });
+});
+
+
+
+#agora vá ao postman e teste a rota GET /users/1 terá esse retorno com a seguinte trataiva de erro:
+
+GET /users/1 404 55.660 ms - 62
+{
+    "message": "User not exists!",
+    "status": 404,
+    "code": "NOT_FOUND"
+}
