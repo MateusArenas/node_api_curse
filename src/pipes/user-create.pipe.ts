@@ -9,7 +9,7 @@ export function userCreatePipe<T extends ZodRawShape>(schema: ZodObject<T>) {
       req.body = schema.parse(req.body);
       next();
     } catch (error) {
-      throw new BadRequest({ message: (error as ZodError).message });
+      throw new BadRequest(error as any);
     }
   };
 }

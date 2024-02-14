@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { z, ZodError, ZodObject, ZodRawShape } from 'zod';
+import { z, ZodError, ZodObject, ZodRawShape, ZodSchema } from 'zod';
 import { BadRequest } from '../exceptions/BadRequest';
-import { ListUsersDto } from '../dtos/users/user-list.dto';
+import { ListUsersDto, listUserSchema } from '../dtos/users/user-list.dto';
 
 // Middleware para validar a query da solicitação
-export function userListPipe<T extends ZodRawShape>(schema: ZodObject<T>) {
+export function userListPipe<T extends ZodRawShape>(
+  schema: typeof listUserSchema
+) {
   return (
     req: Request<{}, {}, {}, ListUsersDto>,
     res: Response,
@@ -12,7 +14,7 @@ export function userListPipe<T extends ZodRawShape>(schema: ZodObject<T>) {
   ) => {
     try {
       // Valida o query da solicitação
-      req.query = schema.parse(req.query) as unknown as ListUsersDto;
+      req.query = schema.parse(req.query);
       next();
     } catch (error) {
       throw new BadRequest({ message: (error as ZodError).message });
