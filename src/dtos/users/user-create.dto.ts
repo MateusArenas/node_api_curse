@@ -1,29 +1,20 @@
 import { z } from 'zod';
 
-z.setErrorMap((issue, _ctx) => {
-  console.log({ issue });
-
-  _ctx.defaultError;
-
-  issue.message;
-
-  // switch (issue.code) {
-  //   case '':
-  //     break;
-
-  //   default:
-  //     break;
-  // }
-
-  return {
-    message: _ctx.defaultError || 'olá mundo',
-  };
-});
-
 export const createUserSchema = z.object({
-  name: z.string(),
-  email: z.string().email('email invalid format.'),
-  password: z.string(),
+  name: z.string({
+    required_error: 'Required name.',
+    invalid_type_error: 'Expected String type in name.',
+  }),
+  email: z
+    .string({
+      required_error: 'Required email.',
+      invalid_type_error: 'Expected String type in email.',
+    })
+    .email('Invalid format in email.'),
+  password: z.string({
+    required_error: 'Required password.',
+    invalid_type_error: 'Expected String type in password.',
+  }),
 });
 
 export type UserCreateDto = z.infer<typeof createUserSchema>;
