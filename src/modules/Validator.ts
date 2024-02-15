@@ -1,14 +1,17 @@
-import { NextFunction, Request, Response } from 'express';
 import { z, ZodError, ZodObject, ZodRawShape } from 'zod';
 
 import { BadRequest } from '../exceptions/BadRequest';
 
-// Middleware para validar o corpo da solicitação
-export function userCreatePipe<T extends ZodRawShape>(schema: ZodObject<T>) {
-  return (req: Request, res: Response, next: NextFunction) => {
+export class Validator<T extends ZodRawShape> {
+  schema: ZodObject<T>;
+  constructor(schema: ZodObject<T>) {
+    this.schema = schema;
+  }
+
+  async validate(data: z.infer<typeof this.schema>) {
     try {
-      req.body = schema.parse(req.body);
-      next();
+      const parsed = await this.schema.parseAsync(data);
+      return parsed;
     } catch (error) {
       const issue = (error as ZodError).issues.find((issue) => issue);
 
@@ -16,5 +19,5 @@ export function userCreatePipe<T extends ZodRawShape>(schema: ZodObject<T>) {
         message: issue?.message ?? 'Scheme validator error.',
       });
     }
-  };
+  }
 }

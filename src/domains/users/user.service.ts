@@ -1,10 +1,10 @@
-import { UserRepository } from './user.repository';
 import { UserCreateDto } from '../../dtos/users/user-create.dto';
+import { ListUsersDto } from '../../dtos/users/user-list.dto';
 import { UserUpdateDto } from '../../dtos/users/user-update.dto';
 import { BadRequest } from '../../exceptions/BadRequest';
-import { User } from './user.entity';
 import { NotFound } from '../../exceptions/NotFound';
-import { ListUsersDto } from '../../dtos/users/user-list.dto';
+import { User } from './user.entity';
+import { UserRepository } from './user.repository';
 
 // Lógica de negócio para operações em usuários
 export class UserService {
@@ -48,8 +48,8 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, data: UserUpdateDto): Promise<User> {
-    const userProps = await this.userRepository.findById(id);
+  async update(data: UserUpdateDto): Promise<User> {
+    const userProps = await this.userRepository.findById(data.id);
 
     if (!userProps) {
       throw new NotFound({ message: 'User not exists!' });

@@ -1,5 +1,5 @@
-import path from 'path';
 import { config } from 'dotenv';
+import path from 'path';
 
 config({ path: path.resolve(__dirname, '../.env') });
 
@@ -10,15 +10,19 @@ import morgan from 'morgan';
 
 import 'express-async-errors';
 
-import { errorHandling } from './handlers/errorHandling';
+import { payloadHandling } from './handlers/payloadHandling';
 
 import { router as usersRoutes } from './routes/users.routes';
+
+import { errorHandling } from './handlers/errorHandling';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use(payloadHandling);
 
 app.use(usersRoutes);
 

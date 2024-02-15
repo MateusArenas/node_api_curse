@@ -1,10 +1,17 @@
+import { Request, Response } from 'express';
+
 import { prisma } from '../database/prisma';
 import { User } from '../domains/users/user.entity';
 import { UserRepository } from '../domains/users/user.repository';
 import { UserService } from '../domains/users/user.service';
-import { Request, Response } from 'express';
-import { ListUsersDto } from '../dtos/users/user-list.dto';
 import { UserCreateDto } from '../dtos/users/user-create.dto';
+import { ListUsersDto } from '../dtos/users/user-list.dto';
+import { UserUpdateDto } from '../dtos/users/user-update.dto';
+import {
+  createUserValidator,
+  listUserValidator,
+  updateUserValidator,
+} from '../validators/user.validator';
 
 const userRepository = new UserRepository(prisma);
 const userService = new UserService(userRepository);
@@ -14,10 +21,14 @@ export class UserController {
     req: Request<{}, {}, {}, ListUsersDto>,
     res: Response<{ users: User[] }>
   ): Promise<void> {
+    const data = req.qs<ListUsersDto>();
+
+    const payload = await listUserValidator.validate(data);
+
     const users = await userService.list({
-      search: req.query.search,
-      skip: req.query.skip,
-      take: req.query.take,
+      search: payload.search,
+      skip: payload.skip,
+      take: payload.take,
     });
 
     res.json({ users });
@@ -30,10 +41,14 @@ export class UserController {
   }
 
   async store(req: Request<{}, UserCreateDto>, res: Response): Promise<void> {
+    const data = req.all<UserCreateDto>();
+
+    const payload = await createUserValidator.validate(data);
+
     const user = await userService.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
+      name: payload.name,
+      email: payload.email,
+      password: payload.password,
     });
 
     res.status(201).json({ user });
@@ -43,10 +58,14 @@ export class UserController {
     req: Request<{ id: string }, Partial<UserCreateDto>>,
     res: Response
   ): Promise<void> {
-    const user = await userService.update(req.params.id, {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
+    const data = req.all<UserUpdateDto>();
+    const payload = await updateUserValidator.validate(data);
+
+    const user = await userService.update({
+      id: payload.id,
+      name: payload.name,
+      email: payload.email,
+      password: payload.password,
     });
 
     res.json({ user });
