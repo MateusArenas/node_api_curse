@@ -690,3 +690,8 @@ GET /users/1 404 55.660 ms - 62
     "status": 404,
     "code": "NOT_FOUND"
 }
+
+
+<!-- https://chat.openai.com/c/fea96f11-5913-4f1c-855a-62fd996ec554 -->
+
+<!-- https://github.com/rocketseat-education/ignite-lab-nodejs/tree/main/src/infra/http/view-models -->
